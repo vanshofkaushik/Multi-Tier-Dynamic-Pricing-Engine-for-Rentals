@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings | DynamicRent</title>
+  <meta name="description" content="View and track your reservation requests, stay dates, and host approval status.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/customer.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Customer role guard immediately
+    requireCustomer();
+  </script>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span>Dynamic<span class="logo-highlight">Rent</span></span>
+      </a>
+
+      <div class="nav-actions">
+        <span class="badge badge-primary" id="nav-user-badge">Customer Mode</span>
+        <button type="button" class="btn btn-secondary btn-sm btn-logout" id="cust-logout-btn" onclick="logout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Portal Header -->
+  <div class="portal-header">
+    <div class="container">
+      <div class="portal-title-row">
+        <div>
+          <h1>My Bookings</h1>
+          <p id="user-greeting-name">Track your active reservations, stay itineraries, and host approval status.</p>
+        </div>
+
+        <nav class="portal-nav">
+          <a href="dashboard.html" class="portal-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Dashboard
+          </a>
+          <a href="properties.html" class="portal-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            Properties
+          </a>
+          <a href="my-bookings.html" class="portal-nav-item active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            My Bookings
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" style="margin-bottom: 60px;">
+    
+    <!-- Controls Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <h2 style="font-size: 1.35rem;" id="my-bookings-count-heading">All Reservations (0)</h2>
+        <p style="font-size: 0.88rem; color: var(--text-secondary);">Review your pending requests and confirmed itineraries.</p>
+      </div>
+      <a href="properties.html" class="btn btn-primary btn-sm">
+        <span>+ Explore Properties</span>
+      </a>
+    </div>
+
+    <!-- Empty State (Shown when no bookings exist for this customer) -->
+    <div id="no-bookings-state" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+      </div>
+      <h3>You don't have any bookings yet.</h3>
+      <p>Discover verified properties with transparent dynamic pricing and make your first reservation.</p>
+      <a href="properties.html" class="btn btn-primary btn-md">Explore Properties</a>
+    </div>
+
+    <!-- Bookings Cards Container -->
+    <div id="bookings-list-container" class="bookings-grid" style="display: none;">
+      <!-- Populated dynamically via myBookings.js -->
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <span>© 2026 DynamicRent Platform. All rights reserved.</span>
+        <span>Customer Booking Management</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/customer/myBookings.js"></script>
+</body>
+</html>
