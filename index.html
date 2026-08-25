@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DynamicRent | Smart Property Rental & Dynamic Pricing</title>
+  <meta name="description" content="Discover quality properties and make smarter rental decisions with demand-based dynamic pricing.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+
+
+
+    /* Hero section specific layout */
+    .hero-container {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 48px;
+      align-items: center;
+      padding: 50px 0 70px;
+    }
+
+    .hero-left {
+      max-width: 580px;
+    }
+
+    .hero-right {
+      position: relative;
+    }
+
+    .hero-image-wrapper {
+      width: 100%;
+      height: 440px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-floating-card {
+      position: absolute;
+      bottom: -20px;
+      left: -20px;
+      background: #ffffff;
+      padding: 16px 22px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+    }
+
+    .hero-floating-card .price-tag {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-green-dark);
+      font-family: var(--font-heading);
+    }
+
+    .hero-floating-card .rating-badge {
+      background: var(--accent-amber-light);
+      color: #b45309;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #fde68a;
+    }
+
+    /* Steps grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .step-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 26px;
+      position: relative;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step-card:hover {
+      border-color: var(--primary-green-border);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .step-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: var(--primary-green);
+      line-height: 1;
+      margin-bottom: 14px;
+      opacity: 0.85;
+    }
+
+    /* Owner Highlight Callout */
+    .owner-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 2px solid var(--primary-green-border);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Stats Grid */
+    .stats-bar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 36px;
+    }
+
+    .stat-box {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .stat-number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: var(--primary-green-dark);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 960px) {
+      .hero-container {
+        grid-template-columns: 1fr;
+        padding: 30px 0 50px;
+      }
+      .hero-floating-card {
+        bottom: 16px;
+        left: 16px;
+      }
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+      .owner-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+      }
+      .stats-bar-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .stats-bar-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo" id="nav-brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span>Dynamic<span class="logo-highlight">Rent</span></span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="login.html" class="nav-link">Properties</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-secondary" id="nav-login-btn">Login</a>
+        <a href="register.html" class="btn btn-primary" id="nav-register-btn">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section (Two-Column Layout) -->
+    <section class="section" style="padding-top: 30px; padding-bottom: 50px;">
+      <div class="container">
+        <div class="hero-container">
+          
+          <!-- Left Column -->
+          <div class="hero-left">
+            <span class="badge badge-primary" style="margin-bottom: 16px;">
+              ⚡ SMART PROPERTY RENTAL
+            </span>
+            <h1 style="margin-bottom: 18px; line-height: 1.18;">
+              Find Your Perfect Stay.<br>
+              <span class="logo-highlight">Price It Smarter.</span>
+            </h1>
+            <p style="font-size: 1.15rem; line-height: 1.65; margin-bottom: 32px; color: var(--text-secondary);">
+              Discover quality properties and make smarter rental decisions with demand-based dynamic pricing.
+            </p>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <a href="login.html" class="btn btn-primary btn-lg" id="hero-explore-btn">
+                <span>Explore Properties</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+              <a href="register.html" class="btn btn-secondary btn-lg" id="hero-get-started-btn">
+                <span>Get Started</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column (High Quality Property Image + Floating Tag) -->
+          <div class="hero-right">
+            <div class="hero-image-wrapper">
+              <img 
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1000&q=80" 
+                alt="Modern Luxury Villa Exterior" 
+                loading="eager"
+              >
+            </div>
+            
+            <div class="hero-floating-card">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Starting from</div>
+                <div class="price-tag">₹2,999 <span style="font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);">/ night</span></div>
+              </div>
+              <div class="rating-badge">
+                <span>★</span> 4.8
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: Why Choose DynamicRent? -->
+    <section class="section" id="about" style="background: var(--surface-secondary); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+      <div class="container">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 46px;">
+          <span class="badge badge-primary" style="margin-bottom: 10px;">Why Us</span>
+          <h2>Why Choose DynamicRent?</h2>
+          <p style="margin-top: 8px;">A smarter rental marketplace built for guest transparency and owner yield.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 26px;">
+          <!-- Card 1 -->
+          <div class="card">
+            <div style="width: 52px; height: 52px; border-radius: 12px; background: var(--primary-green-light); display:flex; align-items:center; justify-content:center; color: var(--primary-green-dark); margin-bottom: 20px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </div>
+            <h3>1. Find Better Properties</h3>
+            <p style="margin-top: 10px; font-size: 0.95rem;">
+              Hand-picked and verified apartments, villas, and modern residences with authentic guest ratings and amenities.
+            </p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="card">
+            <div style="width: 52px; height: 52px; border-radius: 12px; background: var(--primary-green-light); display:flex; align-items:center; justify-content:center; color: var(--primary-green-dark); margin-bottom: 20px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+            </div>
+            <h3>2. Smart Pricing</h3>
+            <p style="margin-top: 10px; font-size: 0.95rem;">
+              Dynamic algorithm factors in live seasonality, occupancy rates, and market demand for optimal fair pricing.
+            </p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="card">
+            <div style="width: 52px; height: 52px; border-radius: 12px; background: var(--primary-green-light); display:flex; align-items:center; justify-content:center; color: var(--primary-green-dark); margin-bottom: 20px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <h3>3. Easy Booking</h3>
+            <p style="margin-top: 10px; font-size: 0.95rem;">
+              Seamless date selection, instant transparent price breakdowns, and straightforward host request management.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Featured Properties -->
+    <section class="section">
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 38px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <span class="badge badge-primary" style="margin-bottom: 8px;">Top Stays</span>
+            <h2>Featured Properties</h2>
+            <p style="margin-top: 6px;">Explore popular demo rental properties available across major cities.</p>
+          </div>
+          <a href="login.html" class="btn btn-secondary btn-sm">Explore All Properties →</a>
+        </div>
+
+        <div class="properties-grid">
+          
+          <!-- Property 1: Green Valley Villa (Hyderabad) -->
+          <div class="property-card">
+            <div class="property-image-wrapper">
+              <img 
+                src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80" 
+                alt="Green Valley Villa, Hyderabad"
+                loading="lazy"
+              >
+              <span class="badge badge-success property-badge">Featured Stay</span>
+              <div class="property-rating">
+                <span>★</span> 4.9
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Hyderabad, Telangana
+              </div>
+              <h3 class="property-title">Green Valley Villa</h3>
+              <div class="property-features">
+                <span>4 Guests</span> • <span>2 Bedrooms</span> • <span>Garden & Pool</span>
+              </div>
+              <div class="property-footer">
+                <div class="property-price">₹4,500 <span>/ night</span></div>
+                <a href="login.html" class="btn btn-secondary btn-sm">View Property</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Property 2: Urban Heights Apartment (Bangalore) -->
+          <div class="property-card">
+            <div class="property-image-wrapper">
+              <img 
+                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80" 
+                alt="Urban Heights Apartment, Bangalore"
+                loading="lazy"
+              >
+              <span class="badge badge-primary property-badge">High Demand</span>
+              <div class="property-rating">
+                <span>★</span> 4.8
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Bangalore, Karnataka
+              </div>
+              <h3 class="property-title">Urban Heights Apartment</h3>
+              <div class="property-features">
+                <span>2 Guests</span> • <span>1 Bedroom</span> • <span>City Panorama</span>
+              </div>
+              <div class="property-footer">
+                <div class="property-price">₹3,200 <span>/ night</span></div>
+                <a href="login.html" class="btn btn-secondary btn-sm">View Property</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Property 3: Lake View Residence (Pune) -->
+          <div class="property-card">
+            <div class="property-image-wrapper">
+              <img 
+                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80" 
+                alt="Lake View Residence, Pune"
+                loading="lazy"
+              >
+              <span class="badge badge-success property-badge">Scenic View</span>
+              <div class="property-rating">
+                <span>★</span> 4.9
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Pune, Maharashtra
+              </div>
+              <h3 class="property-title">Lake View Residence</h3>
+              <div class="property-features">
+                <span>5 Guests</span> • <span>3 Bedrooms</span> • <span>Balcony</span>
+              </div>
+              <div class="property-footer">
+                <div class="property-price">₹3,800 <span>/ night</span></div>
+                <a href="login.html" class="btn btn-secondary btn-sm">View Property</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Property 4: Luxury Garden House (Delhi) -->
+          <div class="property-card">
+            <div class="property-image-wrapper">
+              <img 
+                src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80" 
+                alt="Luxury Garden House, Delhi"
+                loading="lazy"
+              >
+              <span class="badge badge-warning property-badge">Trending</span>
+              <div class="property-rating">
+                <span>★</span> 4.7
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Delhi NCR
+              </div>
+              <h3 class="property-title">Luxury Garden House</h3>
+              <div class="property-features">
+                <span>6 Guests</span> • <span>3 Bedrooms</span> • <span>Private Lawn</span>
+              </div>
+              <div class="property-footer">
+                <div class="property-price">₹5,200 <span>/ night</span></div>
+                <a href="login.html" class="btn btn-secondary btn-sm">View Property</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: How DynamicRent Works -->
+    <section class="section" style="background: var(--surface-secondary); border-top: 1px solid var(--border);">
+      <div class="container">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 30px;">
+          <span class="badge badge-primary" style="margin-bottom: 10px;">Process</span>
+          <h2>How DynamicRent Works</h2>
+          <p style="margin-top: 8px;">A straightforward three-step experience for guests and owners.</p>
+        </div>
+
+        <div class="steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-number">01</div>
+            <h3>Search</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">
+              Find a property that fits your needs. Filter by location, guest capacity, and budget.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-number">02</div>
+            <h3>Book</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">
+              Select your dates and request a booking. Get instant breakdown calculations.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-number">03</div>
+            <h3>Smart Pricing</h3>
+            <p style="margin-top: 8px; font-size: 0.95rem;">
+              Owners can use demand-based pricing recommendations to maximize their rental yield.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: For Property Owners -->
+    <section class="section">
+      <div class="container">
+        <div class="owner-banner">
+          <div style="max-width: 640px;">
+            <span class="badge badge-success" style="background: #ffffff; color: var(--primary-green-dark); margin-bottom: 14px;">
+              Owner Portal
+            </span>
+            <h2 style="font-size: 2.1rem; color: #064e3b; margin-bottom: 12px;">Manage Your Properties Smarter</h2>
+            <p style="color: #065f46; font-size: 1.05rem; line-height: 1.6;">
+              Track bookings, monitor demand and get dynamic pricing recommendations.
+            </p>
+          </div>
+          <div>
+            <a href="login.html" class="btn btn-primary btn-lg" style="background: var(--primary-green-dark); white-space: nowrap;">
+              <span>Owner Dashboard</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Statistics -->
+    <section class="section" style="padding-top: 10px; padding-bottom: 70px;">
+      <div class="container">
+        <div style="text-align: center; margin-bottom: 10px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+            Demo platform statistics
+          </span>
+        </div>
+        
+        <div class="stats-bar-grid">
+          <div class="stat-box">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Properties</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">1,200+</div>
+            <div class="stat-label">Bookings</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Customer Satisfaction</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Support</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+            </div>
+            <span>Dynamic<span class="logo-highlight">Rent</span></span>
+          </div>
+          <p>Smart property rentals with demand-based dynamic pricing for hosts and travelers.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="register.html">Register</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>For Customers</h4>
+          <ul class="footer-links">
+            <li><a href="login.html">Properties</a></li>
+            <li><a href="login.html">Bookings</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>For Owners</h4>
+          <ul class="footer-links">
+            <li><a href="login.html">Dashboard</a></li>
+            <li><a href="login.html">Pricing</a></li>
+            <li><a href="login.html">Analytics</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 DynamicRent. All rights reserved.</span>
+        <span>Smart Rental & Dynamic Pricing Platform</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/shared/toast.js"></script>
+  <script src="js/shared/mobileNav.js"></script>
+  <script src="js/data/userData.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

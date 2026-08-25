@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | DynamicRent</title>
+  <meta name="description" content="Sign in to your DynamicRent customer or owner account.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+  <!-- Minimal Nav -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span>Dynamic<span class="logo-highlight">Rent</span></span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="register.html" class="btn btn-secondary btn-sm">Create Account</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-wrapper">
+    <div class="auth-container">
+      
+      <!-- Alert Notification Banner -->
+      <div id="auth-alert-banner" class="alert-banner alert-danger" style="display: none;"></div>
+
+      <div class="auth-header">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h1>Welcome Back</h1>
+        <p>Sign in to access your portal and listings</p>
+      </div>
+
+      <form id="login-form">
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label class="form-label">Select Account Type</label>
+          <div class="role-selector">
+            <div class="role-option">
+              <input type="radio" id="role-customer" name="role" value="customer" checked>
+              <label for="role-customer" class="role-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Customer
+              </label>
+            </div>
+            <div class="role-option">
+              <input type="radio" id="role-owner" name="role" value="owner">
+              <label for="role-owner" class="role-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Owner
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="name@example.com" required>
+        </div>
+
+        <!-- Password Field with Eye Toggle -->
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+            <button type="button" class="toggle-password-btn" data-target="login-password" title="Show/Hide Password" aria-label="Toggle password visibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary btn-full btn-lg" id="login-submit-btn" style="margin-top: 10px;">
+          <span>Login</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <!-- Demo Accounts Quick Fill Box -->
+      <div class="demo-accounts-box">
+        <h4>⚡ Demo Test Accounts</h4>
+        <div class="demo-account-item">
+          <div>
+            <strong>Customer:</strong> <code>customer@dynamicrent.com</code> (123456)
+          </div>
+          <button type="button" class="demo-quick-btn" data-email="customer@dynamicrent.com" data-role="customer">Use</button>
+        </div>
+        <div class="demo-account-item">
+          <div>
+            <strong>Owner:</strong> <code>owner@dynamicrent.com</code> (123456)
+          </div>
+          <button type="button" class="demo-quick-btn" data-email="owner@dynamicrent.com" data-role="owner">Use</button>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Create account</a>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="index.html" class="back-home">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/shared/toast.js"></script>
+  <script src="js/data/userData.js"></script>
+  <script src="js/auth/login.js"></script>
+</body>
+</html>
