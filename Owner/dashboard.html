@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard | DynamicRent</title>
+  <meta name="description"
+    content="Professional SaaS property management dashboard with real-time occupancy metrics, dynamic demand scoring, and confirmed revenue tracking.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/owner.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/data/userData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/owner/occupancy.js"></script>
+  <script src="../js/owner/demandEngine.js"></script>
+  <script src="../js/owner/seasonRules.js"></script>
+  <script src="../js/owner/pricingEngine.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Owner role authentication immediately
+    requireOwner();
+  </script>
+</head>
+
+<body class="owner-body">
+
+  <div class="owner-app-layout">
+
+    <!-- Left SaaS Sidebar -->
+    <aside class="owner-sidebar">
+      <div class="owner-sidebar-brand">
+        <div class="owner-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="owner-brand-title">Dynamic<span>Rent</span></div>
+          <div class="owner-brand-sub">Property Management</div>
+        </div>
+      </div>
+
+      <nav class="owner-sidebar-nav">
+        <span class="owner-nav-heading">Main Navigation</span>
+
+        <a href="dashboard.html" class="owner-sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="properties.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          <span>Properties</span>
+        </a>
+
+        <a href="bookings.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Bookings</span>
+        </a>
+
+        <a href="pricing.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>Dynamic Pricing</span>
+        </a>
+
+        <a href="analytics.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analytics</span>
+        </a>
+
+        <a href="price-history.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Price History</span>
+        </a>
+      </nav>
+
+      <div class="owner-sidebar-footer">
+        <button type="button" class="owner-logout-btn" onclick="logout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="owner-main-wrapper">
+
+      <!-- Top Sticky Header -->
+      <header class="owner-top-header">
+        <div class="owner-header-left">
+          <h1>Owner Dashboard</h1>
+          <p id="owner-welcome-text">Welcome back, Owner — Real-time occupancy tracking, market demand scoring, and
+            revenue performance.</p>
+        </div>
+
+        <div class="owner-header-right">
+          <!-- Notification Icon -->
+          <button type="button" class="header-action-btn" title="Notifications" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="header-notification-dot"></span>
+          </button>
+
+          <!-- Owner Profile Chip -->
+          <div class="owner-profile-chip">
+            <div class="owner-avatar-circle" id="owner-avatar">O</div>
+            <div class="owner-profile-info">
+              <span class="owner-profile-name" id="owner-name-display">Demo Owner</span>
+              <span class="owner-profile-role">Property Owner</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="owner-content-body">
+
+        <!-- SECTION 2: 5 Key KPI Statistics Cards -->
+        <div class="owner-kpi-grid">
+
+          <!-- KPI 1: Total Properties -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Properties</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-total-properties">0</div>
+            <div class="kpi-subtext">Your active properties</div>
+          </div>
+
+          <!-- KPI 2: Booking Requests -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Booking Requests</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 14 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: #b45309;" id="kpi-total-requests">0</div>
+            <div class="kpi-subtext" id="kpi-pending-subtext">0 pending review</div>
+          </div>
+
+          <!-- KPI 3: Confirmed Bookings -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Confirmed Bookings</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: var(--primary-dark);" id="kpi-confirmed-bookings">0</div>
+            <div class="kpi-subtext">Approved reservations</div>
+          </div>
+
+          <!-- KPI 4: Total Revenue -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Revenue</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: var(--primary-dark);" id="kpi-total-revenue">₹0</div>
+            <div class="kpi-subtext">Confirmed stays only</div>
+          </div>
+
+          <!-- KPI 5: Overall Occupancy Rate -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Occupancy Rate</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M18 20V10"></path>
+                  <path d="M12 20V4"></path>
+                  <path d="M6 20v-4"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: var(--info);" id="kpi-overall-occupancy">0%</div>
+            <div class="kpi-subtext" id="kpi-occupancy-subtext">Current month portfolio</div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 3: Occupancy Overview Widget -->
+        <div class="occupancy-overview-card">
+          <div class="occupancy-card-header">
+            <div class="occupancy-header-info">
+              <h3 id="occupancy-card-title">Portfolio Occupancy Overview</h3>
+              <p id="occupancy-card-subtitle">Calculated strictly from confirmed reservations across your properties for
+                the current month.</p>
+            </div>
+            <div class="occupancy-rate-display">
+              <span class="occupancy-large-percent" id="occupancy-headline-rate">0%</span>
+              <span class="occupancy-percent-label">Occupied</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="occupancy-bar-container">
+            <div class="occupancy-bar-fill" id="occupancy-progress-bar" style="width: 0%;"></div>
+          </div>
+
+          <!-- Metrics Breakdown Strip -->
+          <div class="occupancy-metrics-strip">
+            <div class="occ-metric-item">
+              <span class="occ-metric-label">Occupied Nights</span>
+              <span class="occ-metric-value" id="occ-occupied-nights">0 Nights</span>
+            </div>
+            <div class="occ-metric-item">
+              <span class="occ-metric-label">Total Capacity</span>
+              <span class="occ-metric-value" id="occ-total-nights">0 Nights</span>
+            </div>
+            <div class="occ-metric-item">
+              <span class="occ-metric-label">Confirmed Stays</span>
+              <span class="occ-metric-value" id="occ-confirmed-count">0 Stays</span>
+            </div>
+            <div class="occ-metric-item">
+              <span class="occ-metric-label">Active Listings</span>
+              <span class="occ-metric-value" id="occ-properties-count">0 Listings</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demand Engine Notice Banner -->
+        <div class="engine-notice-banner">
+          <div class="engine-notice-text">
+            <span style="font-size: 1.25rem;">⚡</span>
+            <div>
+              <strong>Dynamic Demand Engine Active:</strong>
+              <span>Demand is based on occupancy, confirmed bookings and recent booking activity.</span>
+            </div>
+          </div>
+          <span class="engine-notice-badge">SaaS Intelligence</span>
+        </div>
+
+        <!-- SECTION 3.5: Analytics Snapshot Widget -->
+        <div class="owner-table-card"
+          style="padding: 18px 24px; margin-bottom: 28px; background: linear-gradient(135deg, var(--surface) 0%, var(--primary-subtle) 100%); border: 1px solid var(--primary-border);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div class="kpi-icon-wrap" style="width: 44px; height: 44px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+              </div>
+              <div>
+                <div
+                  style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); font-family: var(--font-heading, 'Outfit', sans-serif);">
+                  Performance & Revenue Analytics
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;">
+                  Real-time occupancy benchmarks, revenue trends, and dynamic pricing metrics.
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <a href="analytics.html" class="btn btn-primary btn-sm">View Full Analytics &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: Recent Booking Requests Table Section -->
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-title">Recent Booking Requests</h2>
+            <p class="section-subtitle">Latest reservation requests submitted by customers for your listings.</p>
+          </div>
+          <a href="bookings.html" class="btn btn-primary btn-sm">
+            <span>Manage All Bookings</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <div class="owner-table-card">
+          <div class="owner-table-wrapper">
+            <table class="owner-table" id="dashboard-recent-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Customer</th>
+                  <th>Dates</th>
+                  <th>Guests</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-recent-tbody">
+                <!-- Dynamically populated via ownerDashboard.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECTION 5: Property Performance Section -->
+        <div class="section-header-row">
+          <div>
+            <h2 class="section-title">Property Performance</h2>
+            <p class="section-subtitle">Real-time occupancy rates, confirmed bookings, and live market demand scores.
+            </p>
+          </div>
+          <a href="properties.html" class="btn btn-outline btn-sm">
+            <span>View All Properties</span>
+          </a>
+        </div>
+
+        <div class="performance-grid" id="dashboard-performance-grid">
+          <!-- Dynamically populated via ownerDashboard.js -->
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <script src="../js/owner/ownerDashboard.js"></script>
+</body>
+
+</html>
