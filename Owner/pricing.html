@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Pricing | DynamicRent</title>
+  <meta name="description" content="Optimize your property prices using demand, occupancy, season, day of week, and market conditions.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/owner.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/data/userData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/owner/occupancy.js"></script>
+  <script src="../js/owner/demandEngine.js"></script>
+  <script src="../js/owner/seasonRules.js"></script>
+  <script src="../js/owner/pricingEngine.js"></script>
+  <script src="../js/owner/priceHistory.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Owner role authentication immediately
+    requireOwner();
+  </script>
+</head>
+<body class="owner-body">
+
+  <div class="owner-app-layout">
+    
+    <!-- Left SaaS Sidebar -->
+    <aside class="owner-sidebar">
+      <div class="owner-sidebar-brand">
+        <div class="owner-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="owner-brand-title">Dynamic<span>Rent</span></div>
+          <div class="owner-brand-sub">Property Management</div>
+        </div>
+      </div>
+
+      <nav class="owner-sidebar-nav">
+        <span class="owner-nav-heading">Main Navigation</span>
+        
+        <a href="dashboard.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="properties.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          <span>Properties</span>
+        </a>
+
+        <a href="bookings.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Bookings</span>
+        </a>
+
+        <a href="pricing.html" class="owner-sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>Dynamic Pricing</span>
+        </a>
+
+        <a href="analytics.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analytics</span>
+        </a>
+
+        <a href="price-history.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Price History</span>
+        </a>
+      </nav>
+
+      <div class="owner-sidebar-footer">
+        <button type="button" class="owner-logout-btn" onclick="logout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="owner-main-wrapper">
+      
+      <!-- Top Sticky Header -->
+      <header class="owner-top-header">
+        <div class="owner-header-left">
+          <h1>Dynamic Pricing</h1>
+          <p id="owner-welcome-text">Optimize your property prices using demand and market conditions.</p>
+        </div>
+
+        <div class="owner-header-right">
+          <!-- Notification Icon -->
+          <button type="button" class="header-action-btn" title="Notifications" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="header-notification-dot"></span>
+          </button>
+
+          <!-- Owner Profile Chip -->
+          <div class="owner-profile-chip">
+            <div class="owner-avatar-circle" id="owner-avatar">O</div>
+            <div class="owner-profile-info">
+              <span class="owner-profile-name" id="owner-name-display">Demo Owner</span>
+              <span class="owner-profile-role">Property Owner</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="owner-content-body">
+        
+        <!-- Controls & Property / Date Selector Bar -->
+        <div class="filter-card" style="margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+            
+            <!-- Property Selector -->
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1; min-width: 280px;">
+              <label class="form-label" for="pricing-property-select" style="margin-bottom: 0; white-space: nowrap;">Select Property:</label>
+              <select id="pricing-property-select" class="form-control" style="width: auto; min-width: 280px; flex: 1;">
+                <!-- Populated dynamically via pricingPage.js -->
+              </select>
+            </div>
+
+            <!-- Date Selector -->
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <label class="form-label" for="pricing-date-input" style="margin-bottom: 0; white-space: nowrap;">Pricing Date:</label>
+              <input type="date" id="pricing-date-input" class="form-control" style="width: auto; min-width: 160px;">
+            </div>
+
+            <div>
+              <span class="badge badge-primary">⚡ Rule-Based Engine Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Responsive Cockpit Layout -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; margin-bottom: 32px;" class="pricing-cockpit-grid">
+          
+          <!-- LEFT COLUMN: Current Rate, Factors & Transparent Breakdown -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- 1. Current Property Price Card -->
+            <div class="owner-kpi-card" style="padding: 20px;">
+              <div class="kpi-header">
+                <span class="kpi-label">Current Property Rate</span>
+                <span class="badge badge-neutral">Active Customer Price</span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <div class="kpi-value" style="color: var(--primary-dark);" id="current-price-val">₹4,500</div>
+                  <div class="kpi-subtext">Base Anchor: <strong id="base-price-val" style="color: var(--text-primary);">₹4,500</strong></div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 0.76rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Safe Price Limit</div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary);" id="price-range-val">₹3,000 – ₹7,000</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Pricing Factors Grid -->
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-xs);">
+              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px 0; font-family: var(--font-heading, 'Outfit', sans-serif);">
+                Live Market Signals & Multipliers
+              </h3>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 16px 0;">
+                Calculated in real-time from occupancy, market demand, season, day of week, and property amenities.
+              </p>
+
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                
+                <!-- Factor 1: Occupancy -->
+                <div style="background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Occupancy</span>
+                    <span class="badge" id="factor-occupancy-badge">+10%</span>
+                  </div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);" id="factor-occupancy-val">65.0%</div>
+                </div>
+
+                <!-- Factor 2: Demand -->
+                <div style="background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Demand Tier</span>
+                    <span class="badge" id="factor-demand-badge">+10%</span>
+                  </div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);" id="factor-demand-val">High (71/100)</div>
+                </div>
+
+                <!-- Factor 3: Season -->
+                <div style="background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Season Factor</span>
+                    <span class="badge" id="factor-season-badge">0%</span>
+                  </div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);" id="factor-season-val">Normal Season</div>
+                </div>
+
+                <!-- Factor 4: Day of Week -->
+                <div style="background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Day of Week</span>
+                    <span class="badge" id="factor-day-badge">+5%</span>
+                  </div>
+                  <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-primary);" id="factor-day-val">Friday</div>
+                </div>
+
+                <!-- Factor 5: Amenities (Spans full width) -->
+                <div style="grid-column: 1 / -1; background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;">
+                  <div>
+                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Property Amenities</div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: 2px;">Premium features (Pool, AC, Lawn, Wi-Fi)</div>
+                  </div>
+                  <span class="badge badge-primary" id="factor-amenity-badge">+10%</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- 3. Transparent Calculation Breakdown Table -->
+            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-xs);">
+              <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin: 0; font-family: var(--font-heading, 'Outfit', sans-serif);">
+                  Step-by-Step Price Breakdown
+                </h3>
+              </div>
+              <div class="owner-table-wrapper">
+                <table class="owner-table">
+                  <thead>
+                    <tr>
+                      <th>Pricing Layer</th>
+                      <th>Basis / Rule</th>
+                      <th style="text-align: right;">Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pricing-breakdown-tbody">
+                    <!-- Injected dynamically via pricingPage.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: Recommended Price Card & Approval CTA -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div style="background: var(--surface); border: 1.5px solid var(--primary-border); border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-md); display: flex; flex-direction: column; justify-content: space-between; min-height: 440px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                  <span class="badge badge-primary" style="font-size: 0.82rem; padding: 5px 12px;">Algorithm Recommendation</span>
+                  <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Step 8 Engine</span>
+                </div>
+
+                <div style="text-align: center; padding: 24px; background: var(--primary-subtle); border-radius: var(--radius-lg); border: 1px solid var(--primary-border); margin-bottom: 20px;">
+                  <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">
+                    Recommended Optimal Rate
+                  </div>
+                  <div style="font-size: 2.8rem; font-weight: 800; font-family: var(--font-heading, 'Outfit', sans-serif); color: var(--primary-dark); margin: 4px 0 2px;" id="recommended-price-display">
+                    ₹0
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px;" id="recommended-current-baseline">
+                    Current Rate: ₹0 / night
+                  </div>
+                  <div style="font-size: 0.92rem;" id="recommended-price-change">
+                    +₹0 (+0.0%)
+                  </div>
+                </div>
+
+                <!-- Dynamic Explanation Box -->
+                <div style="background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 24px;">
+                  <div style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">
+                    Algorithm Rationale
+                  </div>
+                  <p style="font-size: 0.86rem; color: var(--text-primary); line-height: 1.5; margin: 0;" id="pricing-explanation-text">
+                    Calculating recommendation...
+                  </p>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" class="btn btn-primary btn-lg" id="btn-approve-price" style="width: 100%; font-size: 1rem; font-weight: 700;">
+                  Approve New Price
+                </button>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px;">
+                  <a href="price-history.html" class="btn btn-outline btn-sm" style="width: 100%; justify-content: center;">
+                    View Price History Audit Log
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Business Safeguard Note -->
+            <div class="engine-notice-banner" style="margin-bottom: 0;">
+              <div class="engine-notice-text">
+                <span style="font-size: 1.2rem;">🔒</span>
+                <div>
+                  <strong>Owner Guard Active:</strong>
+                  <span>Prices are never modified automatically. You maintain full oversight and must approve recommended updates.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="owner-toast-container" class="toast-container"></div>
+
+  <script src="../js/owner/pricingPage.js"></script>
+</body>
+</html>
