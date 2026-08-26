@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Property | DynamicRent</title>
+  <meta name="description" content="Configure stay dates and guest count to reserve your rental property with live pricing calculation.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/customer.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/utils/validation.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Customer role authentication immediately
+    requireCustomer();
+  </script>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span>Dynamic<span class="logo-highlight">Rent</span></span>
+      </a>
+
+      <div class="nav-actions">
+        <span class="badge badge-primary" id="nav-user-badge">Customer Mode</span>
+        <button type="button" class="btn btn-secondary btn-sm btn-logout" id="cust-logout-btn" onclick="logout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Portal Header -->
+  <div class="portal-header">
+    <div class="container">
+      <div class="portal-title-row">
+        <div>
+          <div style="margin-bottom: 6px;">
+            <a href="properties.html" style="font-size: 0.88rem; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+              ← Back to Properties
+            </a>
+          </div>
+          <h1>Book Property</h1>
+          <p id="user-greeting-name">Select your stay dates and guests to submit your booking request.</p>
+        </div>
+
+        <nav class="portal-nav">
+          <a href="dashboard.html" class="portal-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            Dashboard
+          </a>
+          <a href="properties.html" class="portal-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            Properties
+          </a>
+          <a href="my-bookings.html" class="portal-nav-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            My Bookings
+          </a>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" style="max-width: 1040px; margin-bottom: 60px;">
+    
+    <!-- Error / Not Found State -->
+    <div id="booking-error-state" class="empty-state" style="display: none;">
+      <div class="empty-state-icon" style="background: var(--accent-rose-light); color: var(--accent-rose);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <h3 id="booking-error-title">Property Not Available</h3>
+      <p id="booking-error-desc">The requested property could not be found or is currently not open for new bookings.</p>
+      <a href="properties.html" class="btn btn-primary btn-sm">Browse Other Properties</a>
+    </div>
+
+    <!-- Booking Content Layout (Left: Property Info | Right: Booking Form) -->
+    <div id="booking-content-grid" class="booking-grid">
+      
+      <!-- LEFT SIDE: Property Information -->
+      <aside class="booking-property-sidebar">
+        <div class="card property-preview-card">
+          <div class="preview-image-wrapper">
+            <img id="prop-preview-img" src="" alt="Property Preview">
+            <span class="badge badge-primary preview-badge" id="prop-preview-type">Villa</span>
+          </div>
+
+          <div class="preview-content">
+            <div class="preview-header">
+              <h2 id="prop-preview-name" class="preview-title">Loading Property...</h2>
+              <div class="preview-rating">
+                <span>★</span> <span id="prop-preview-rating">4.8</span>
+                <span id="prop-preview-reviews" style="color: var(--text-muted); font-size: 0.82rem; font-weight: 500;">(124 reviews)</span>
+              </div>
+            </div>
+
+            <div class="preview-location">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span id="prop-preview-location">Loading location...</span>
+            </div>
+
+            <div class="preview-specs-grid">
+              <div class="spec-pill">
+                <span class="spec-label">Capacity</span>
+                <strong id="prop-preview-maxguests">-- Max Guests</strong>
+              </div>
+              <div class="spec-pill">
+                <span class="spec-label">Bedrooms</span>
+                <strong id="prop-preview-bedrooms">-- Beds</strong>
+              </div>
+              <div class="spec-pill">
+                <span class="spec-label">Bathrooms</span>
+                <strong id="prop-preview-bathrooms">-- Baths</strong>
+              </div>
+            </div>
+
+            <div class="preview-price-box">
+              <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Rate Per Night</div>
+                <div class="preview-rate" id="prop-preview-price">₹0</div>
+              </div>
+              <span class="badge badge-success" id="prop-preview-status">Available</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT SIDE: Booking Form & Live Breakdown -->
+      <section class="booking-form-section">
+        <div class="card">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2 style="font-size: 1.45rem; margin-bottom: 4px;">Reservation Details</h2>
+              <p style="font-size: 0.9rem;">Select check-in and check-out dates to calculate your stay pricing.</p>
+            </div>
+            <span class="badge badge-amber" style="text-transform: none; font-weight: 600;">Status: Initial Pending</span>
+          </div>
+
+          <!-- Alert Container for Validation / Duplicate Errors -->
+          <div id="booking-alert" class="booking-alert-banner" style="display: none;"></div>
+
+          <form id="booking-form" onsubmit="handleBookingSubmit(event)">
+            <!-- Stay Dates Grid -->
+            <div class="form-row-grid">
+              <div class="form-group">
+                <label class="form-label" for="checkin-date">
+                  Check-in Date <span style="color: var(--accent-rose);">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="checkin-date" 
+                  class="form-control" 
+                  required
+                >
+                <span class="field-hint" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: block;">Select arrival date (today or future)</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="checkout-date">
+                  Check-out Date <span style="color: var(--accent-rose);">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="checkout-date" 
+                  class="form-control" 
+                  required
+                >
+                <span class="field-hint" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: block;">Must be after check-in date</span>
+              </div>
+            </div>
+
+            <!-- Number of Guests -->
+            <div class="form-group">
+              <label class="form-label" for="guest-count">
+                Number of Guests <span style="color: var(--accent-rose);">*</span>
+              </label>
+              <select id="guest-count" class="form-control" required>
+                <option value="1">1 Guest</option>
+              </select>
+              <span id="guest-limit-hint" class="field-hint" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: block;">
+                Maximum capacity allowed for this property.
+              </span>
+            </div>
+
+            <!-- Live Price Summary Breakdown -->
+            <div class="price-summary-container">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="font-size: 1.1rem;">Price Breakdown</h3>
+                <span class="badge badge-primary" id="nights-live-badge">0 Nights</span>
+              </div>
+
+              <div class="price-breakdown-box">
+                <div class="breakdown-row">
+                  <span>Price per night</span>
+                  <strong id="summary-price-night">₹0</strong>
+                </div>
+                <div class="breakdown-row">
+                  <span>Number of nights</span>
+                  <strong id="summary-nights">0 nights</strong>
+                </div>
+                <div class="breakdown-row">
+                  <span>Subtotal</span>
+                  <strong id="summary-subtotal">₹0</strong>
+                </div>
+                <div class="breakdown-row">
+                  <span>Cleaning Fee</span>
+                  <span>₹0</span>
+                </div>
+                <div class="breakdown-row">
+                  <span>Service Fee</span>
+                  <span>₹0</span>
+                </div>
+                <div class="breakdown-row total">
+                  <span>Total Price</span>
+                  <span id="summary-total-price" style="color: var(--primary-green-dark); font-size: 1.35rem;">₹0</span>
+                </div>
+              </div>
+
+              <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 10px; display: flex; align-items: center; gap: 6px;">
+                <span>🔒</span>
+                <span>Price snapshot is locked upon submission and unaffected by future rate changes.</span>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submit-booking-btn" style="margin-top: 20px;">
+              <span>Submit Booking Request</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Booking Success Modal Overlay -->
+    <div id="booking-success-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <div class="success-icon-circle">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h2 style="font-size: 1.6rem; margin-bottom: 8px;">Booking Request Submitted!</h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 24px;">
+          Your reservation request has been created with status <strong>Pending</strong>. The owner will review and confirm your stay.
+        </p>
+
+        <!-- Booking Details Card -->
+        <div class="success-details-box">
+          <div class="success-detail-row">
+            <span class="detail-label">Booking ID</span>
+            <strong class="detail-value" id="success-booking-id">BOOK001</strong>
+          </div>
+          <div class="success-detail-row">
+            <span class="detail-label">Property</span>
+            <strong class="detail-value" id="success-prop-name">Green Valley Villa</strong>
+          </div>
+          <div class="success-detail-row">
+            <span class="detail-label">Stay Dates</span>
+            <span class="detail-value" id="success-dates">25 Aug 2026 → 28 Aug 2026</span>
+          </div>
+          <div class="success-detail-row">
+            <span class="detail-label">Guests & Nights</span>
+            <span class="detail-value" id="success-guests-nights">4 Guests • 3 Nights</span>
+          </div>
+          <div class="success-detail-row">
+            <span class="detail-label">Total Price</span>
+            <strong class="detail-value" style="color: var(--primary-green-dark); font-size: 1.1rem;" id="success-total-price">₹13,500</strong>
+          </div>
+          <div class="success-detail-row" style="border-bottom: none; padding-bottom: 0;">
+            <span class="detail-label">Initial Status</span>
+            <span class="badge badge-warning" id="success-status">🟡 Pending</span>
+          </div>
+        </div>
+
+        <!-- Action Links -->
+        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+          <a href="my-bookings.html" class="btn btn-primary btn-full" style="flex: 1;">
+            <span>View My Bookings</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a href="properties.html" class="btn btn-secondary btn-full" style="flex: 1;">
+            <span>Explore More</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <span>© 2026 DynamicRent Platform. All rights reserved.</span>
+        <span>Customer Booking Checkout</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/customer/booking.js"></script>
+</body>
+</html>
