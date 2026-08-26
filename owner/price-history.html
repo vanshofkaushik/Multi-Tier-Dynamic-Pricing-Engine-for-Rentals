@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Price History Log | DynamicRent</title>
+  <meta name="description" content="Audit log and historical timeline of dynamic price adjustments and multiplier triggers.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/owner.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/data/userData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/owner/occupancy.js"></script>
+  <script src="../js/owner/demandEngine.js"></script>
+  <script src="../js/owner/seasonRules.js"></script>
+  <script src="../js/owner/pricingEngine.js"></script>
+  <script src="../js/owner/priceHistory.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Owner role authentication immediately
+    requireOwner();
+  </script>
+</head>
+<body class="owner-body">
+
+  <div class="owner-app-layout">
+    
+    <!-- Left SaaS Sidebar -->
+    <aside class="owner-sidebar">
+      <div class="owner-sidebar-brand">
+        <div class="owner-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="owner-brand-title">Dynamic<span>Rent</span></div>
+          <div class="owner-brand-sub">Property Management</div>
+        </div>
+      </div>
+
+      <nav class="owner-sidebar-nav">
+        <span class="owner-nav-heading">Main Navigation</span>
+        
+        <a href="dashboard.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="properties.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          <span>Properties</span>
+        </a>
+
+        <a href="bookings.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Bookings</span>
+        </a>
+
+        <a href="pricing.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>Dynamic Pricing</span>
+        </a>
+
+        <a href="analytics.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analytics</span>
+        </a>
+
+        <a href="price-history.html" class="owner-sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Price History</span>
+        </a>
+      </nav>
+
+      <div class="owner-sidebar-footer">
+        <button type="button" class="owner-logout-btn" onclick="logout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="owner-main-wrapper">
+      
+      <!-- Top Sticky Header -->
+      <header class="owner-top-header">
+        <div class="owner-header-left">
+          <h1>Price History Log</h1>
+          <p id="owner-welcome-text">Chronological record of approved dynamic rate adjustments and algorithmic multiplier triggers.</p>
+        </div>
+
+        <div class="owner-header-right">
+          <!-- Notification Icon -->
+          <button type="button" class="header-action-btn" title="Notifications" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="header-notification-dot"></span>
+          </button>
+
+          <!-- Owner Profile Chip -->
+          <div class="owner-profile-chip">
+            <div class="owner-avatar-circle" id="owner-avatar">O</div>
+            <div class="owner-profile-info">
+              <span class="owner-profile-name" id="owner-name-display">Demo Owner</span>
+              <span class="owner-profile-role">Property Owner</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="owner-content-body">
+        
+        <!-- Summary KPI Cards -->
+        <div class="owner-kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+          
+          <!-- 1. Total Changes -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Price Changes</span>
+              <div class="kpi-icon-wrap blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 14 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="hist-stat-total">0</div>
+            <div class="kpi-subtext">Approved rate adjustments</div>
+          </div>
+
+          <!-- 2. Average Shift -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Average Shift</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: var(--primary-dark);" id="hist-stat-avg">₹0</div>
+            <div class="kpi-subtext">Net pricing movement</div>
+          </div>
+
+          <!-- 3. Rate Increases -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Rate Increases</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: var(--primary-dark);" id="hist-stat-inc">0</div>
+            <div class="kpi-subtext">High demand captures</div>
+          </div>
+
+          <!-- 4. Rate Decreases -->
+          <div class="owner-kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Rate Decreases</span>
+              <div class="kpi-icon-wrap amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color: #b45309;" id="hist-stat-dec">0</div>
+            <div class="kpi-subtext">Off-peak volume stimulants</div>
+          </div>
+
+        </div>
+
+        <!-- Filter Card -->
+        <div class="filter-card">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            
+            <!-- Search -->
+            <div class="search-input-wrapper" style="flex: 1; min-width: 240px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="history-search-input" class="form-control" placeholder="Search listing, reason, or audit ID...">
+            </div>
+
+            <!-- Property Filter -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label class="form-label" for="history-property-filter" style="margin-bottom: 0; font-size: 0.78rem;">Listing:</label>
+              <select id="history-property-filter" class="form-control" style="width: auto; min-width: 180px;">
+                <option value="all">All Properties</option>
+              </select>
+            </div>
+
+            <!-- Direction Filter -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label class="form-label" for="history-direction-filter" style="margin-bottom: 0; font-size: 0.78rem;">Change:</label>
+              <select id="history-direction-filter" class="form-control" style="width: auto; min-width: 140px;">
+                <option value="all">All Changes</option>
+                <option value="increase">Increases Only</option>
+                <option value="decrease">Decreases Only</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-sm" id="history-reset-btn">Reset Filters</button>
+
+          </div>
+
+          <div class="filter-actions" style="margin-top: 12px; padding-top: 12px;">
+            <span class="filter-results-count" id="history-results-count">Showing 0 audit records</span>
+            <a href="pricing.html" class="btn btn-primary btn-sm">Optimize Rates</a>
+          </div>
+        </div>
+
+        <!-- Audit Table Card -->
+        <div class="owner-table-card">
+          <div class="owner-table-wrapper">
+            <table class="owner-table">
+              <thead>
+                <tr>
+                  <th>Audit Date / ID</th>
+                  <th>Listing</th>
+                  <th>Previous Price</th>
+                  <th>New Price</th>
+                  <th>Change</th>
+                  <th>Algorithm Reason & Factors</th>
+                </tr>
+              </thead>
+              <tbody id="price-history-tbody">
+                <!-- Injected dynamically via priceHistory.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
