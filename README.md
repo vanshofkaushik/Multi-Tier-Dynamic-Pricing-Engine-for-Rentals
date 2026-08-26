@@ -2,6 +2,7 @@
 
 # DynamicRent 🏡⚡
 ### Smart Property Rental & Rule-Based Dynamic Pricing Platform
+#### Live Demo: https://multi-tier-dynamic-pricing-engine-f.vercel.app/
 
 **DynamicRent** is a property rental platform that combines property booking with a rule-based dynamic pricing engine. Customers can browse properties and make bookings, while property owners can manage bookings and optimize rental prices based on occupancy, demand, seasonality, day of week and property amenities.
 
