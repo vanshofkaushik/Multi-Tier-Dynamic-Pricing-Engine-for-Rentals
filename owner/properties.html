@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Properties | DynamicRent</title>
+  <meta name="description" content="Manage your property listings, base pricing, and live dynamic rates.">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/owner.css">
+  <script src="../js/data/propertyData.js"></script>
+  <script src="../js/data/bookingData.js"></script>
+  <script src="../js/data/userData.js"></script>
+  <script src="../js/utils/storage.js"></script>
+  <script src="../js/utils/dateUtils.js"></script>
+  <script src="../js/utils/api.js"></script>
+  <script src="../js/owner/occupancy.js"></script>
+  <script src="../js/owner/demandEngine.js"></script>
+  <script src="../js/owner/seasonRules.js"></script>
+  <script src="../js/owner/pricingEngine.js"></script>
+  <script src="../js/auth/authGuard.js"></script>
+  <script src="../js/auth/logout.js"></script>
+  <script src="../js/shared/toast.js"></script>
+  <script src="../js/shared/mobileNav.js"></script>
+  <script>
+    // Enforce Owner role authentication immediately
+    requireOwner();
+  </script>
+</head>
+<body class="owner-body">
+
+  <div class="owner-app-layout">
+    
+    <!-- Left SaaS Sidebar -->
+    <aside class="owner-sidebar">
+      <div class="owner-sidebar-brand">
+        <div class="owner-brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div>
+          <div class="owner-brand-title">Dynamic<span>Rent</span></div>
+          <div class="owner-brand-sub">Property Management</div>
+        </div>
+      </div>
+
+      <nav class="owner-sidebar-nav">
+        <span class="owner-nav-heading">Main Navigation</span>
+        
+        <a href="dashboard.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="properties.html" class="owner-sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          </svg>
+          <span>Properties</span>
+        </a>
+
+        <a href="bookings.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Bookings</span>
+        </a>
+
+        <a href="pricing.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>Dynamic Pricing</span>
+        </a>
+
+        <a href="analytics.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Analytics</span>
+        </a>
+
+        <a href="price-history.html" class="owner-sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+          <span>Price History</span>
+        </a>
+      </nav>
+
+      <div class="owner-sidebar-footer">
+        <button type="button" class="owner-logout-btn" onclick="logout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="owner-main-wrapper">
+      
+      <!-- Top Sticky Header -->
+      <header class="owner-top-header">
+        <div class="owner-header-left">
+          <h1>My Properties</h1>
+          <p id="owner-welcome-text">Portfolio overview with current dynamic pricing, occupancy rates, and demand tiers.</p>
+        </div>
+
+        <div class="owner-header-right">
+          <!-- Notification Icon -->
+          <button type="button" class="header-action-btn" title="Notifications" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="header-notification-dot"></span>
+          </button>
+
+          <!-- Owner Profile Chip -->
+          <div class="owner-profile-chip">
+            <div class="owner-avatar-circle" id="owner-avatar">O</div>
+            <div class="owner-profile-info">
+              <span class="owner-profile-name" id="owner-name-display">Demo Owner</span>
+              <span class="owner-profile-role">Property Owner</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="owner-content-body">
+        
+        <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <h2 class="section-title">Portfolio Listings</h2>
+            <p class="section-subtitle" id="portfolio-subtitle">Manage listings, view occupancy metrics, and inspect dynamic rates.</p>
+          </div>
+          <div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openAddPropertyModal()">
+              <span>+ Add New Listing</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="properties-loading-state" style="display: none; text-align: center; padding: 48px 20px;">
+          <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+          <div style="display: inline-block; width: 36px; height: 36px; border: 3px solid rgba(16, 185, 129, 0.2); border-top-color: var(--primary-green, #10b981); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 14px;">Loading your portfolio listings from server...</p>
+        </div>
+
+        <!-- API Error State -->
+        <div id="properties-api-error-state" class="empty-state" style="display: none;">
+          <div class="empty-state-icon" style="background: #fee2e2; color: #dc2626;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 id="properties-api-error-title" style="color: #991b1b;">Unable to connect to the server. Please try again.</h3>
+          <p id="properties-api-error-message" style="color: var(--text-secondary); max-width: 480px; margin: 0 auto 20px;">
+            Unable to connect to the server. Please try again.
+          </p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="initOwnerPropertiesPage()">
+            Retry Connection
+          </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="properties-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <h3>No properties registered yet.</h3>
+          <p>You haven't listed any properties under this owner account yet.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddPropertyModal()">
+            + Add Your First Listing
+          </button>
+        </div>
+
+        <div class="performance-grid" id="owner-properties-grid">
+          <!-- Populated dynamically via ownerProperties.js -->
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Add / Edit Property Modal -->
+  <div id="owner-property-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 620px; text-align: left; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <h2 style="font-size: 1.25rem; margin: 0; font-family: var(--font-heading, 'Outfit', sans-serif);" id="modal-property-heading">Add New Listing</h2>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closePropertyModal()" style="padding: 4px 8px; border-radius: 50%;">✕</button>
+      </div>
+
+      <form id="owner-property-form" onsubmit="handleSaveProperty(event)">
+        <input type="hidden" id="form-prop-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="form-prop-title">Property Title *</label>
+          <input type="text" id="form-prop-title" class="form-control" placeholder="e.g. Hyderabad Luxury Villa" required minlength="3" maxlength="120">
+          <small style="color: var(--text-muted); font-size: 0.76rem;">Between 3 and 120 characters</small>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="form-prop-location">Location (City) *</label>
+            <input type="text" id="form-prop-location" class="form-control" placeholder="e.g. Hyderabad" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-prop-type">Property Type *</label>
+            <select id="form-prop-type" class="form-control" required>
+              <option value="Apartment">Apartment</option>
+              <option value="Villa">Villa</option>
+              <option value="House">House</option>
+              <option value="Studio">Studio</option>
+              <option value="Condo">Condo</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label" for="form-prop-price">Price Per Night (₹) *</label>
+            <input type="number" id="form-prop-price" class="form-control" placeholder="3000" min="1" step="50" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-prop-bedrooms">Bedrooms</label>
+            <input type="number" id="form-prop-bedrooms" class="form-control" value="1" min="0" step="1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-prop-bathrooms">Bathrooms</label>
+            <input type="number" id="form-prop-bathrooms" class="form-control" value="1" min="0" step="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-prop-description">Description *</label>
+          <textarea id="form-prop-description" class="form-control" rows="3" placeholder="Describe the property features, proximity, views, etc. (min 10 characters)" required minlength="10"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-prop-image">Image URL</label>
+          <input type="url" id="form-prop-image" class="form-control" placeholder="https://images.unsplash.com/...">
+          <small style="color: var(--text-muted); font-size: 0.76rem;">Leave blank for default high-resolution image</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="form-prop-amenities">Amenities (comma-separated)</label>
+          <input type="text" id="form-prop-amenities" class="form-control" placeholder="e.g. WiFi, Pool, AC, Parking, Kitchen">
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 14px;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closePropertyModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-save-property">Save Property</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Property Confirmation Modal -->
+  <div id="delete-property-modal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+    <div class="modal-card" style="max-width: 440px; text-align: left; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 600; margin: 0; color: #111827;">Delete Property</h3>
+          <p style="font-size: 0.85rem; color: #6b7280; margin: 2px 0 0;">This action cannot be undone.</p>
+        </div>
+      </div>
+      <p id="delete-property-confirm-text" style="font-size: 0.92rem; color: #374151; margin-bottom: 16px; line-height: 1.5;">
+        Are you sure you want to permanently delete <strong id="delete-property-name">this property</strong>?
+      </p>
+      <div id="delete-modal-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 10px 12px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 16px;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-outline btn-sm" id="btn-cancel-delete" onclick="closeDeletePropertyModal()">Cancel</button>
+        <button type="button" class="btn btn-sm" id="btn-confirm-delete" onclick="confirmDeleteProperty()" style="background: #dc2626; color: #fff; border: 1px solid #dc2626; font-weight: 500;">
+          Delete Property
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="owner-toast-container" class="toast-container"></div>
+
+  <script src="../js/owner/ownerProperties.js"></script>
+</body>
+</html>
