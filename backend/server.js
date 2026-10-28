@@ -71,7 +71,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/pricing', pricingRoutes);
 // Serve Frontend
-const frontendPath = path.resolve(__dirname, '..');
+
 
 app.use('/css', express.static(path.join(frontendPath, 'css')));
 app.use('/js', express.static(path.join(frontendPath, 'js')));
