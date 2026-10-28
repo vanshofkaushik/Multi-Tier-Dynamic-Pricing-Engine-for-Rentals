@@ -32,23 +32,15 @@ app.use('/api', (req, res, next) => {
 });
 
 // Root endpoint for simple browser inspection
+const frontendPath = path.resolve(__dirname, '..');
+
 app.get('/', (req, res) => {
-  res.json({
-    message: 'DynamicRent Backend API is running',
-    endpoints: {
-      healthCheck: '/api/health',
-      auth: {
-        register: 'POST /api/auth/register',
-        login: 'POST /api/auth/login',
-        profile: 'GET /api/auth/me'
-      },
-      properties: '/api/properties',
-      bookings: '/api/bookings',
-      pricing: '/api/pricing'
-    }
-  });
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
+app.get(['/index.html', '/login.html', '/register.html', '/demo.html'], (req, res) => {
+  res.sendFile(path.join(frontendPath, path.basename(req.path)));
+});
 // GET /api/health - Health check endpoint (reports server & database state)
 app.get('/api/health', (req, res) => {
   const dbStates = {
@@ -78,7 +70,17 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/pricing', pricingRoutes);
+// Serve Frontend
+const frontendPath = path.resolve(__dirname, '..');
 
+app.use('/css', express.static(path.join(frontendPath, 'css')));
+app.use('/js', express.static(path.join(frontendPath, 'js')));
+app.use('/customer', express.static(path.join(frontendPath, 'customer')));
+app.use('/owner', express.static(path.join(frontendPath, 'owner')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 // Handle undefined routes
 app.use((req, res) => {
   res.status(404).json({
