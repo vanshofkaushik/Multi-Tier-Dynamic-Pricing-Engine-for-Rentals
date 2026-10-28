@@ -32,7 +32,7 @@ if (typeof window !== 'undefined') {
 
 const ApiClient = {
   // Base URL for the Express backend API
-  BASE_URL: 'http://localhost:5000/api',
+  BASE_URL: '/api',
 
   /**
    * Normalize a property object from MongoDB Atlas into a format fully compatible
